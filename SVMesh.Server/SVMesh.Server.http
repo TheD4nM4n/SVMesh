@@ -1,0 +1,6 @@
+@SVMesh.Server_HostAddress = http://localhost:5183
+
+GET {{SVMesh.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
