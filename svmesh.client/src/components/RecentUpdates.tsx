@@ -1,29 +1,35 @@
-import { Box, Typography } from "@mui/material";
-
-const styles = {
-  boxContainerStyle: {
-    backgroundColor: "background.paper",
-    borderRadius: "4px",
-    padding: 1,
-  },
-  uploadButton: {
-    border: "2px dashed lightgrey",
-    borderRadius: "8px",
-    width: "100%",
-    padding: 4,
-    textTransform: "none",
-  },
-};
+import { Box, CircularProgress } from "@mui/material";
+import { useUpdates } from "../hooks/useUpdates";
+import { RecentUpdatesList } from "./updates";
+import { StyledText } from "./ui";
 
 export default function RecentUpdates() {
+  const { posts, loading, error } = useUpdates();
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <StyledText type="subheading" sx={{ mb: 2 }}>
+          Recent Updates
+        </StyledText>
+        <StyledText type="body" sx={{ color: "error.main" }}>
+          Error loading updates: {error}
+        </StyledText>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={styles.boxContainerStyle}>
-      <Typography variant="h6" gutterBottom>
-        Recent Updates
-      </Typography>
-      <Typography variant="body2" color="textSecondary">
-        No recent updates available.
-      </Typography>
+    <Box>
+      <RecentUpdatesList posts={posts} maxPosts={3} />
     </Box>
   );
 }

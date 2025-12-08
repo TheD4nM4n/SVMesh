@@ -8,36 +8,42 @@ interface StyledTextProps extends Omit<TypographyProps, "children"> {
 
 const textStyles = {
   heading: {
-    variant: "h3" as const,
-    color: "primary" as const,
-    sx: {
-      fontWeight: "bold",
-      letterSpacing: "-0.5px",
-      mb: 3,
-    },
-  },
-  subheading: {
-    variant: "h5" as const,
+    variant: "h4" as const,
     color: "primary" as const,
     sx: {
       fontWeight: "600",
-      letterSpacing: "-0.25px",
-      mb: 2,
+      letterSpacing: "-0.75px",
+      mb: { xs: 2, md: 2.5 },
+      fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
+    },
+  },
+  subheading: {
+    variant: "h6" as const,
+    color: "primary" as const,
+    sx: {
+      fontWeight: "500",
+      letterSpacing: "-0.5px",
+      mb: { xs: 1, md: 1.5 },
+      fontSize: { xs: "1rem", sm: "1.1rem", md: "1.25rem" },
     },
   },
   body: {
     variant: "body1" as const,
     sx: {
       color: "text.primary",
-      lineHeight: 1.7,
+      lineHeight: 1.6,
+      fontSize: { xs: "0.9rem", md: "0.95rem" },
+      fontWeight: "400",
     },
   },
   "body-large": {
     variant: "body1" as const,
     sx: {
       color: "text.primary",
-      lineHeight: 1.7,
-      fontSize: "1.1rem",
+      lineHeight: 1.6,
+      fontSize: { xs: "1rem", md: "1.05rem" },
+      fontWeight: "400",
+      opacity: 0.9,
     },
   },
 };

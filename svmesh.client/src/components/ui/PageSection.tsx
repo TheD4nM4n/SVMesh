@@ -1,5 +1,5 @@
 import { Grid, Typography, Box } from "@mui/material";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface PageSectionProps {
   title?: string;
@@ -9,9 +9,9 @@ interface PageSectionProps {
 }
 
 const spacingMap = {
-  compact: { px: 4, py: 3 },
-  normal: { px: 4, py: 6 },
-  large: { px: 4, py: 8 },
+  compact: { px: { xs: 3, md: 12 }, py: 3 },
+  normal: { px: { xs: 3, md: 12 }, py: 6 },
+  large: { px: { xs: 3, md: 12 }, py: 8 },
 };
 
 export default function PageSection({

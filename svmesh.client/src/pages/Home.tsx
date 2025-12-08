@@ -1,4 +1,5 @@
 import susquehannaValley from "../assets/susquehanna-valley.jpg";
+import meshtasticPowered from "../assets/meshtastic-powered.png";
 import RecentUpdates from "../components/RecentUpdates";
 import {
   HeroSection,
@@ -16,6 +17,9 @@ export default function Home() {
         title="We mesh well together."
         subtitle="We're a community group dedicated to connecting the Susquehanna Valley together using low-power, long-range radio devices."
         textAlign="left"
+        rightImage={meshtasticPowered}
+        rightImageAlt="Meshtastic Powered"
+        attributionUrl="https://commons.wikimedia.org/wiki/File:Ridges_and_valleys_near_the_West_Branch_Susquehanna_River.jpg"
       />
 
       <PageSection>

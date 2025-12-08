@@ -12,6 +12,59 @@ declare module "@mui/material/styles" {
 }
 
 export const theme = createTheme({
+  typography: {
+    fontFamily: [
+      "Inter",
+      "SF Pro Display",
+      "-apple-system",
+      "BlinkMacSystemFont",
+      "Segoe UI",
+      "Roboto",
+      "Oxygen",
+      "Ubuntu",
+      "Cantarell",
+      "sans-serif",
+    ].join(","),
+    h1: {
+      fontWeight: 600,
+      letterSpacing: "-0.025em",
+    },
+    h2: {
+      fontWeight: 600,
+      letterSpacing: "-0.025em",
+    },
+    h3: {
+      fontWeight: 600,
+      letterSpacing: "-0.025em",
+    },
+    h4: {
+      fontWeight: 600,
+      letterSpacing: "-0.025em",
+    },
+    h5: {
+      fontWeight: 500,
+      letterSpacing: "-0.015em",
+    },
+    h6: {
+      fontWeight: 500,
+      letterSpacing: "-0.015em",
+    },
+    body1: {
+      fontWeight: 400,
+      letterSpacing: "-0.01em",
+      lineHeight: 1.6,
+    },
+    body2: {
+      fontWeight: 400,
+      letterSpacing: "-0.01em",
+      lineHeight: 1.5,
+    },
+    button: {
+      fontWeight: 500,
+      letterSpacing: "-0.01em",
+      textTransform: "none",
+    },
+  },
   palette: {
     mode: "light", // Changed from dark to light
     background: {
