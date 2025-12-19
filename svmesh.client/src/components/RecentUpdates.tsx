@@ -1,15 +1,30 @@
-import { Box, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
 import { useUpdates } from "../hooks/useUpdates";
 import { RecentUpdatesList } from "./updates";
 import { StyledText } from "./ui";
+import type { UpdatePost } from "../utils/markdown";
 
-export default function RecentUpdates() {
-  const { posts, loading, error } = useUpdates();
+interface RecentUpdatesProps {
+  posts?: UpdatePost[];
+  error?: string | null;
+}
+
+export default function RecentUpdates({
+  posts: propsPosts,
+  error: propsError,
+}: RecentUpdatesProps = {}) {
+  // If posts and error are provided as props, use them (for Home page)
+  // Otherwise, use the hook for standalone usage
+  const hookData = useUpdates();
+
+  const posts = propsPosts ?? hookData.posts;
+  const error = propsError ?? hookData.error;
+  const loading = propsPosts === undefined ? hookData.loading : false;
 
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-        <CircularProgress size={24} />
+        {/* This will only show for standalone usage, not on Home page */}
       </Box>
     );
   }

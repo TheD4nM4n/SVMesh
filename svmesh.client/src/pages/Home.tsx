@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Box, CircularProgress } from "@mui/material";
 import RecentUpdates from "../components/RecentUpdates";
 import MarkdownContent from "../components/MarkdownContent";
 import {
@@ -8,6 +9,7 @@ import {
   StyledText,
 } from "../components/ui";
 import { parsePageMarkdown, type ParsedPage } from "../utils/pageMarkdown";
+import { useUpdates } from "../hooks/useUpdates";
 
 // Import assets dynamically based on markdown
 import susquehannaValley from "../assets/susquehanna-valley.jpg";
@@ -20,7 +22,8 @@ const assetMap: Record<string, string> = {
 
 export default function Home() {
   const [pageData, setPageData] = useState<ParsedPage | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
+  const { posts, loading: updatesLoading, error: updatesError } = useUpdates();
 
   useEffect(() => {
     const loadPageContent = async () => {
@@ -30,17 +33,27 @@ export default function Home() {
       } catch (error) {
         console.error("Failed to load home page content:", error);
       } finally {
-        setLoading(false);
+        setPageLoading(false);
       }
     };
 
     loadPageContent();
   }, []);
 
-  if (loading) {
+  // Show loading until both page content and updates are ready
+  if (pageLoading || updatesLoading) {
     return (
       <PageSection>
-        <StyledText type="body">Loading...</StyledText>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "200px",
+          }}
+        >
+          <CircularProgress size={40} />
+        </Box>
       </PageSection>
     );
   }
@@ -78,7 +91,7 @@ export default function Home() {
               <MarkdownContent content={content} />
             </>
           }
-          sideContent={<RecentUpdates />}
+          sideContent={<RecentUpdates posts={posts} error={updatesError} />}
         />
       </PageSection>
     </>

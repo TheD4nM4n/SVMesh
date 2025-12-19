@@ -2,25 +2,34 @@ import { useState, useEffect } from "react";
 import type { UpdatePost } from "../utils/markdown";
 import { parseMarkdownPost, sortPostsByDate } from "../utils/markdown";
 
-// Fetch markdown files from the server
+// Fetch markdown files dynamically from the server
 const fetchUpdateFiles = async () => {
-  const fileNames = [
-    "welcome-to-svmesh.md",
-    "community-meeting.md",
-    "test-event.md",
-  ];
-
   const updateModules: Record<string, string> = {};
 
-  for (const fileName of fileNames) {
-    try {
-      const response = await fetch(`/content/updates/${fileName}`);
-      if (response.ok) {
-        updateModules[`/updates/${fileName}`] = await response.text();
-      }
-    } catch (error) {
-      console.warn(`Failed to fetch ${fileName}:`, error);
+  try {
+    // First, get the list of available files from the API
+    const listResponse = await fetch("/api/content/updates");
+    if (!listResponse.ok) {
+      throw new Error(`Failed to get file list: ${listResponse.status}`);
     }
+
+    const { files } = await listResponse.json();
+
+    // Then fetch each file's content
+    for (const fileName of files) {
+      try {
+        const response = await fetch(`/content/updates/${fileName}`);
+        if (response.ok) {
+          updateModules[`/updates/${fileName}`] = await response.text();
+        } else {
+          console.warn(`Failed to fetch ${fileName}: ${response.status}`);
+        }
+      } catch (error) {
+        console.warn(`Failed to fetch ${fileName}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error("Failed to load update files:", error);
   }
 
   return updateModules;

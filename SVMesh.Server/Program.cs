@@ -13,7 +13,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ProductionPolicy", policy =>
     {
-        policy.WithOrigins("https://your-domain.com") // Update with your actual domain
+        policy.WithOrigins("https://svmesh.thed4nm4n.com") // Updated with actual domain
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
