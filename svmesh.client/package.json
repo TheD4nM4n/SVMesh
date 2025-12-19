@@ -7,7 +7,11 @@
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "lint:fix": "eslint . --fix",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist node_modules/.vite",
+    "dev:docker": "docker-compose -f ../docker-compose.dev.yml up"
   },
   "dependencies": {
     "@emotion/styled": "^11.14.1",

@@ -14,8 +14,9 @@ export interface ParsedPage {
 
 export async function parsePageMarkdown(pageName: string): Promise<ParsedPage> {
   try {
-    // Fetch the markdown file from the server
-    const response = await fetch(`/content/pages/${pageName}.md`);
+    // Fetch the markdown file from the server with cache busting
+    const cacheBuster = `?v=${Date.now()}`;
+    const response = await fetch(`/content/pages/${pageName}.md${cacheBuster}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch page: ${response.status}`);
     }

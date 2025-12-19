@@ -1,3 +1,5 @@
+using Microsoft.Extensions.FileProviders;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -52,6 +54,14 @@ app.UseCors("ProductionPolicy");
 // Static files and routing
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+// Serve content files from mounted volumes
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.Combine(app.Environment.WebRootPath, "content")),
+    RequestPath = "/content"
+});
 
 app.UseRouting();
 app.UseAuthorization();
