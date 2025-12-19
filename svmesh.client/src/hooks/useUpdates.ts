@@ -4,7 +4,8 @@ import { parseMarkdownPost, sortPostsByDate } from "../utils/markdown";
 
 // Import all markdown files dynamically
 const updateModules = import.meta.glob("/src/content/updates/*.md", {
-  as: "raw",
+  query: "?raw",
+  import: "default",
   eager: true,
 });
 

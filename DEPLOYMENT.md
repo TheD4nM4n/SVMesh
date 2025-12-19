@@ -6,6 +6,23 @@ This guide will help you deploy your SVMesh application securely to the public i
 
 ## Quick Start
 
+### Option A: Cloudflare Tunnel (Recommended)
+
+1. **Set up Cloudflare Tunnel:**
+
+   ```bash
+   ./setup-tunnel.sh
+   ```
+
+2. **Follow the setup guide to get your tunnel token**
+
+3. **Deploy with tunnel:**
+   ```bash
+   ./deploy.sh
+   ```
+
+### Option B: Traditional SSL Deployment
+
 1. **Deploy the application:**
 
    ```bash

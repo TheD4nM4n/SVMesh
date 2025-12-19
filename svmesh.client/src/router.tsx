@@ -1,10 +1,13 @@
 import { createBrowserRouter } from "react-router";
-import Home from "./pages/Home.tsx";
+import { lazy } from "react";
 import StandardLayout from "./layouts/StandardLayout.tsx";
-import GettingStarted from "./pages/GettingStarted.tsx";
-import ChannelSettings from "./pages/ChannelSettings.tsx";
-import Maps from "./pages/Maps.tsx";
 import ErrorScreen from "./components/ErrorScreen.tsx";
+
+// Lazy load page components for code splitting
+const Home = lazy(() => import("./pages/Home.tsx"));
+const GettingStarted = lazy(() => import("./pages/GettingStarted.tsx"));
+const ChannelSettings = lazy(() => import("./pages/ChannelSettings.tsx"));
+const Maps = lazy(() => import("./pages/Maps.tsx"));
 
 export const router = createBrowserRouter([
   {

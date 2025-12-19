@@ -1,14 +1,7 @@
-import { useEffect, useState } from "react";
-import MarkdownContent from "../components/MarkdownContent";
 import { SimpleHero, PageSection, StyledText } from "../components/ui";
-import { parsePageMarkdown, type ParsedPage } from "../utils/pageMarkdown";
 
 // Import assets
 import tBeam from "../assets/tbeam.jpg";
-
-const assetMap: Record<string, string> = {
-  "tbeam.jpg": tBeam,
-};
 
 export default function GettingStarted() {
   return (
