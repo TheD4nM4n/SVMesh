@@ -1,0 +1,137 @@
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    # Security headers (Traefik may add additional ones via middleware)
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+
+    # Hide nginx version
+    server_tokens off;
+
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=login:10m rate=10r/m;
+    limit_req_zone $binary_remote_addr zone=api:10m rate=100r/m;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/javascript
+        application/xml+rss
+        application/json;
+
+    # Trust Traefik proxy headers
+    # Set this to your Traefik container's IP range or network
+    set_real_ip_from 172.16.0.0/12;  # Docker default networks
+    set_real_ip_from 10.0.0.0/8;     # Docker custom networks
+    real_ip_header X-Forwarded-For;
+    real_ip_recursive on;
+
+    upstream svmesh_backend {
+        server svmesh-app:8080;
+    }
+
+    # Main server block (HTTP only - Traefik handles HTTPS)
+    server {
+        listen 80;
+        server_name _;  # Accept any hostname since Traefik routes here
+
+        # Logging
+        access_log /var/log/nginx/svmesh_access.log;
+        error_log /var/log/nginx/svmesh_error.log;
+
+        # Security and performance
+        client_max_body_size 10M;
+
+        # Security: Block common exploit attempts
+        location ~ /\. {
+            deny all;
+        }
+
+        location ~* \.(git|svn|hg) {
+            deny all;
+        }
+        
+        # Rate limiting for login endpoints
+        location /api/auth/ {
+            limit_req zone=login burst=5 nodelay;
+            limit_req_status 429;
+            proxy_pass http://svmesh_backend;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $http_host;
+        }
+
+        # Rate limiting for API endpoints
+        location /api/ {
+            limit_req zone=api burst=20 nodelay;
+            limit_req_status 429;
+            proxy_pass http://svmesh_backend;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $http_host;
+        }
+
+        # Static files with caching
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            proxy_pass http://svmesh_backend;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $http_host;
+            expires 7d;
+            add_header Cache-Control "public, immutable";
+        }
+
+        # Main application
+        location / {
+            proxy_pass http://svmesh_backend;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $http_host;
+
+            # WebSocket support (if needed)
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+
+            # Timeouts
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+        }
+
+        # Health check endpoint
+        location /health {
+            access_log off;
+            proxy_pass http://svmesh_backend;
+            proxy_set_header Host $http_host;
+        }
+
+        # Custom error pages (optional)
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+            root /usr/share/nginx/html;
+        }
+    }
+}

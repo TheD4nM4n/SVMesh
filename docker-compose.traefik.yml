@@ -1,0 +1,74 @@
+services:
+  # Reverse proxy for SSL termination and security
+  nginx:
+    image: nginx:alpine
+    container_name: svmesh-nginx
+    ports:
+      - "${NGINX_PORT:-8081}:80" # Expose nginx on configurable port
+    volumes:
+      - ./nginx.conf.traefik:/etc/nginx/nginx.conf:ro
+      - /var/log/nginx:/var/log/nginx
+    depends_on:
+      - svmesh-app
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    networks:
+      - internal
+
+  # Main SVMesh application
+  svmesh-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: svmesh-app
+    expose:
+      - "8080"
+    volumes:
+      - ./pages:/app/wwwroot/content/pages:ro
+      - ./updates:/app/wwwroot/content/updates:ro
+      - app-data:/app/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/tmp
+    networks:
+      - internal
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  app-data:
+    driver: local
+
+networks:
+  # Internal network for app communication
+  internal:
+    name: svmesh-internal
+    driver: bridge

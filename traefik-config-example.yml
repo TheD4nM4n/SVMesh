@@ -1,0 +1,100 @@
+# Traefik Configuration for SVMesh (Static IP)
+# Place this file in your Traefik config directory (e.g., traefik/config/svmesh.yml)
+# Make sure the file provider is enabled in your Traefik static configuration
+
+http:
+  routers:
+    # HTTPS Router
+    svmesh:
+      rule: "Host(`svmesh.guilfordhill.club`)"
+      entryPoints:
+        - websecure
+      service: svmesh
+      tls:
+        certResolver: letsencrypt # Change to match your cert resolver name
+      middlewares:
+        - svmesh-security
+        - svmesh-compress
+
+    # HTTP Router (redirects to HTTPS)
+    svmesh-http:
+      rule: "Host(`svmesh.guilfordhill.club`)"
+      entryPoints:
+        - web
+      middlewares:
+        - redirect-to-https
+      service: svmesh
+
+  services:
+    svmesh:
+      loadBalancer:
+        servers:
+          # CHANGE THIS: Replace with your SVMesh server's IP address and port
+          - url: "http://192.168.1.100:8081"
+
+        # Health check configuration
+        healthCheck:
+          path: /health
+          interval: 30s
+          timeout: 10s
+
+        # Sticky sessions (if needed)
+        # sticky:
+        #   cookie:
+        #     name: svmesh_session
+
+  middlewares:
+    # HTTPS redirect
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    # Security headers
+    svmesh-security:
+      headers:
+        # SSL/TLS Headers
+        sslRedirect: true
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+
+        # Security Headers
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+
+        # Custom Security Headers
+        customResponseHeaders:
+          X-Frame-Options: "SAMEORIGIN"
+          X-Content-Type-Options: "nosniff"
+          X-XSS-Protection: "1; mode=block"
+
+    # Compression
+    svmesh-compress:
+      compress: {}
+
+    # Optional: Rate limiting
+    # svmesh-ratelimit:
+    #   rateLimit:
+    #     average: 100
+    #     burst: 50
+    #     period: 1m
+
+    # Optional: IP whitelist
+    # svmesh-ipwhitelist:
+    #   ipWhiteList:
+    #     sourceRange:
+    #       - "127.0.0.1/32"
+    #       - "192.168.1.0/24"
+# TLS Configuration (optional)
+# tls:
+#   options:
+#     default:
+#       minVersion: VersionTLS12
+#       cipherSuites:
+#         - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+#         - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+#         - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
