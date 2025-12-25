@@ -2,42 +2,43 @@
 # Stage 1: Build the React frontend
 FROM node:20-alpine as frontend-build
 
-# Install build tools globally to avoid Alpine permission issues
-RUN npm install -g typescript vite
-
 WORKDIR /app/client
 
-# Copy package files and install dependencies (including dev dependencies for build)
+# Copy only package files first for better layer caching
 COPY svmesh.client/package*.json ./
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit
 
-# Copy source code and build
-COPY svmesh.client/ ./
-RUN tsc -b && vite build
+# Copy only necessary source files (exclude node_modules, dist, etc.)
+COPY svmesh.client/src ./src
+COPY svmesh.client/public ./public
+COPY svmesh.client/index.html ./
+COPY svmesh.client/vite.config.ts ./
+COPY svmesh.client/tsconfig*.json ./
+COPY svmesh.client/eslint.config.js ./
+
+# Build the application
+RUN npm run build
 
 # Stage 2: Build the .NET backend
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS backend-build
-WORKDIR /app
-
-# Copy project files (excluding .esproj to avoid npm build in backend)
-COPY SVMesh.Server/*.csproj ./SVMesh.Server/
-
-# Restore dependencies
 WORKDIR /app/SVMesh.Server
+
+# Copy only project file for restore (better caching)
+COPY SVMesh.Server/*.csproj ./
+
+# Restore dependencies in a separate layer
 RUN dotnet restore
 
-# Copy backend source code only
-WORKDIR /app
-COPY SVMesh.Server/ ./SVMesh.Server/
+# Copy only necessary source files
+COPY SVMesh.Server/*.cs ./
+COPY SVMesh.Server/*.json ./
+COPY SVMesh.Server/Properties/ ./Properties/
+COPY SVMesh.Server/Controllers/ ./Controllers/
 
 # Copy the built frontend from the previous stage
-COPY --from=frontend-build /app/client/dist ./SVMesh.Server/wwwroot
-
-# Remove the project reference to the frontend project to avoid npm build
-RUN sed -i '/<ProjectReference.*svmesh.client.*esproj>/,/<\/ProjectReference>/d' ./SVMesh.Server/SVMesh.Server.csproj
+COPY --from=frontend-build /app/client/dist ./wwwroot
 
 # Build and publish the application
-WORKDIR /app/SVMesh.Server
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
 # Stage 3: Runtime image

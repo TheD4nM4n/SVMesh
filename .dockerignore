@@ -1,22 +1,23 @@
 # Docker ignore file for SVMesh project
-# Ignore version control
+
+# Version control
 .git/
 .gitignore
 .gitattributes
 
-# Ignore documentation
-README.md
-CHANGELOG.md
+# Documentation (keep essential docs small)
 *.md
+!README.md
 
-# Ignore IDE/Editor files
+# IDE/Editor files
 .vscode/
 .vs/
 *.swp
 *.swo
 *~
+.idea/
 
-# Ignore OS generated files
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -25,19 +26,23 @@ CHANGELOG.md
 ehthumbs.db
 Thumbs.db
 
-# Ignore build outputs and artifacts
+# Build outputs (CRITICAL: don't copy these)
 **/bin/
 **/obj/
 **/out/
 **/target/
 **/build/
 **/dist/
+**/wwwroot/
 
-# Node.js
-node_modules/
+# Node.js (CRITICAL: biggest space saver)
+**/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.npm/
+.yarn/
+package-lock.json.bak
 
 # .NET
 *.user
@@ -46,15 +51,14 @@ yarn-error.log*
 *.docstates
 [Dd]ebug/
 [Rr]elease/
-packages/
-TestResults/
+**/packages/
+**/TestResults/
+**/.vs/
 
 # Environment files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
 # Logs
 logs/
@@ -66,7 +70,20 @@ logs/
 *.crt
 ssl/
 
-# Docker
-Dockerfile
+# Docker (don't copy Docker files into image)
+Dockerfile*
 docker-compose*.yml
 .dockerignore
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__/
+**/coverage/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
