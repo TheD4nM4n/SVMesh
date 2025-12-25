@@ -5,19 +5,23 @@ Welcome to the SVMesh documentation. This directory contains comprehensive guide
 ## Documentation Overview
 
 ### [Deployment Guide](deployment-guide.md)
-Complete guide for deploying SVMesh to production environments with two main options:
-- **Cloudflare Tunnel** (recommended): Secure, encrypted connections without port management
-- **Traditional SSL**: Standard HTTPS deployment with manual certificate management
 
-### [Cloudflare Tunnel Setup](cloudflare-tunnel-setup.md)
-Detailed walkthrough for setting up Cloudflare Tunnel integration:
-- Step-by-step tunnel creation
-- DNS and hostname configuration  
-- Advanced tunnel features and troubleshooting
-- Security considerations and best practices
+Complete guide for deploying SVMesh to production environments with various deployment options including traditional SSL/TLS setup.
+
+### [Traefik Static IP Setup](traefik-static-ip-setup.md)
+
+Detailed walkthrough for integrating SVMesh with Traefik reverse proxy:
+
+- Static IP configuration (no Docker Swarm required)
+- Traefik configuration examples
+- Firewall setup and network configuration
+- Advanced middleware and security features
+- Complete troubleshooting guide
 
 ### [Security Guide](security-guide.md)
+
 Comprehensive security documentation covering:
+
 - Container and application security
 - Network hardening and SSL/TLS configuration
 - Infrastructure security and monitoring
@@ -25,7 +29,9 @@ Comprehensive security documentation covering:
 - Incident response procedures
 
 ### [Markdown Guide](markdown-guide.md)
+
 Complete reference for content creation and formatting:
+
 - Standard markdown syntax with Material-UI styling
 - Special banner components (info, warning, critical)
 - Frontmatter configuration for pages and updates
@@ -34,15 +40,17 @@ Complete reference for content creation and formatting:
 
 ## 🚀 Quick Start
 
-For new deployments, start with the [Deployment Guide](deployment-guide.md). If you want the simplest and most secure setup, follow the Cloudflare Tunnel option.
+For new deployments, start with the [Traefik Static IP Setup](traefik-static-ip-setup.md) for a modern reverse proxy solution with automatic SSL/TLS.
 
 ### Recommended Deployment Flow
 
 1. **Choose Deployment Method**
-   - For maximum security and simplicity: [Cloudflare Tunnel Setup](cloudflare-tunnel-setup.md)
-   - For traditional hosting: Traditional SSL section in [Deployment Guide](deployment-guide.md)
+
+   - For modern reverse proxy: [Traefik Static IP Setup](traefik-static-ip-setup.md)
+   - For traditional hosting: [Deployment Guide](deployment-guide.md)
 
 2. **Follow Security Guidelines**
+
    - Review the [Security Guide](security-guide.md) for hardening steps
    - Implement monitoring and logging
    - Configure appropriate access controls
@@ -52,29 +60,20 @@ For new deployments, start with the [Deployment Guide](deployment-guide.md). If 
    - Set up monitoring and alerting
    - Document your specific configuration
 
-## Migration from Scripts
-
-This documentation replaces the previous deployment scripts:
-
-- **`deploy.sh`** → [Deployment Guide](deployment-guide.md)
-- **`setup-tunnel.sh`** → [Cloudflare Tunnel Setup](cloudflare-tunnel-setup.md)
-- **Security considerations** → [Security Guide](security-guide.md)
-
-The documentation provides the same functionality with more detailed explanations, troubleshooting guidance, and security best practices.
-
 ## Prerequisites
 
 Before following any deployment guide, ensure you have:
 
 - **Docker and Docker Compose** installed
 - **Domain name** (for public deployments)
-- **Cloudflare account** (for tunnel deployments)
-- **SSL certificates** (for traditional deployments)
+- **Traefik instance** (for Traefik deployments)
+- **SSL certificates** (for traditional deployments, or use Traefik with Let's Encrypt)
 - **Server with appropriate resources**
 
 ## Document Structure
 
 Each guide includes:
+
 - **Prerequisites** - What you need before starting
 - **Step-by-step instructions** - Detailed deployment steps
 - **Configuration examples** - Copy-paste configurations
@@ -86,14 +85,14 @@ Each guide includes:
 
 - **General setup issues**: Check the troubleshooting sections in each guide
 - **Security concerns**: Review the [Security Guide](security-guide.md)
-- **Cloudflare-specific issues**: See [Cloudflare Tunnel Setup](cloudflare-tunnel-setup.md)
+- **Traefik-specific issues**: See [Traefik Static IP Setup](traefik-static-ip-setup.md)
 - **Application bugs**: Create a GitHub issue in the main repository
 
 ## Additional Resources
 
 - [SVMesh Repository](../README.md) - Main project documentation
 - [Docker Documentation](https://docs.docker.com/) - Container platform docs
-- [Cloudflare Tunnel Docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/) - Official tunnel documentation
+- [Traefik Documentation](https://doc.traefik.io/traefik/) - Modern reverse proxy docs
 - [Let's Encrypt](https://letsencrypt.org/) - Free SSL certificates
 
 ## Keeping Documentation Updated
@@ -107,4 +106,4 @@ This documentation is maintained alongside the codebase. When updating configura
 
 ---
 
-*Last updated: December 2025*
+_Last updated: December 2025_

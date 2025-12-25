@@ -5,93 +5,31 @@ This guide provides step-by-step instructions for deploying SVMesh to production
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- Domain name (for Cloudflare Tunnel option)
-- Cloudflare account (for Cloudflare Tunnel option)
-- SSL certificates (for traditional deployment option)
+- Domain name (for public deployments)
+- Traefik instance (recommended) or SSL certificates for traditional deployment
 
 ## Deployment Options
 
-### Option A: Cloudflare Tunnel (Recommended)
+### Option A: Traefik Reverse Proxy (Recommended)
 
-Cloudflare Tunnel provides secure, encrypted connections without exposing ports or managing SSL certificates.
+For Traefik deployments with automatic SSL/TLS, see the dedicated guide:
 
-#### Advantages
-- No firewall configuration needed
-- SSL handled automatically by Cloudflare
-- DDoS protection included
-- No open ports on your server
-- Built-in security features
+**➡️ [Traefik Static IP Setup Guide](traefik-static-ip-setup.md)**
 
-#### Setup Steps
+This option provides:
 
-1. **Create tunnel configuration file**
-   ```bash
-   # Create .env file if it doesn't exist
-   cp .env.example .env
-   ```
-
-2. **Set up Cloudflare Tunnel**
-   - Log in to [Cloudflare Dashboard](https://one.dash.cloudflare.com/)
-   - Navigate to **Zero Trust > Access > Tunnels**
-   - Click **Create a tunnel**
-   - Choose **Cloudflared**
-   - Give it a name (e.g., 'svmesh')
-   - Install cloudflared connector (choose **Docker**)
-
-3. **Configure tunnel hostname**
-   - Add a public hostname:
-     - **Subdomain**: your-subdomain (or leave blank for root domain)
-     - **Domain**: your-domain.com
-     - **Service Type**: HTTP
-     - **URL**: `http://nginx:80`
-
-4. **Get tunnel token**
-   - Copy the tunnel token from the Docker run command
-   - Example: `cloudflared tunnel --no-autoupdate run --token eyJhIjoiN...`
-   - Copy everything after `--token `
-
-5. **Configure environment variables**
-   Edit `.env` file:
-   ```bash
-   CLOUDFLARE_TUNNEL_TOKEN=your_actual_token_here
-   DOMAIN=your-domain.com
-   ```
-
-6. **Deploy application**
-   ```bash
-   # Create necessary directories
-   mkdir -p ssl logs
-   
-   # Build Docker images
-   docker-compose build --no-cache
-   
-   # Use Cloudflare-optimized nginx configuration
-   cp nginx-cloudflare.conf nginx.conf.tunnel
-   
-   # Update docker-compose.yml to use tunnel config
-   sed -i 's|./nginx.conf:/etc/nginx/nginx.conf:ro|./nginx.conf.tunnel:/etc/nginx/nginx.conf:ro|' docker-compose.yml
-   
-   # Start services
-   docker-compose up -d
-   
-   # Wait for services to start
-   sleep 10
-   ```
-
-7. **Verify deployment**
-   ```bash
-   # Check if nginx is responding
-   docker exec svmesh-nginx curl -f http://localhost/
-   
-   # Check logs if needed
-   docker-compose logs -f
-   ```
+- ✅ Automatic SSL/TLS with Let's Encrypt
+- ✅ Modern reverse proxy with dynamic configuration
+- ✅ No Docker Swarm required (static IP setup)
+- ✅ Built-in load balancing and middleware support
+- ✅ Easy integration with existing Traefik instances
 
 ### Option B: Traditional SSL Deployment
 
-For deployments without Cloudflare Tunnel, you'll need to manage SSL certificates and firewall configuration.
+For deployments without Traefik, you'll need to manage SSL certificates and firewall configuration manually.
 
 #### Prerequisites
+
 - SSL certificates (Let's Encrypt or custom)
 - Domain pointing to your server
 - Firewall properly configured
@@ -101,19 +39,21 @@ For deployments without Cloudflare Tunnel, you'll need to manage SSL certificate
 1. **Prepare SSL certificates**
 
    **Option 1: Let's Encrypt (Recommended)**
+
    ```bash
    # Install certbot
    sudo apt update && sudo apt install certbot
-   
+
    # Obtain certificates
    sudo certbot certonly --standalone -d your-domain.com
-   
+
    # Copy certificates
    sudo cp /etc/letsencrypt/live/your-domain.com/fullchain.pem ssl/
    sudo cp /etc/letsencrypt/live/your-domain.com/privkey.pem ssl/
    ```
 
    **Option 2: Custom certificates**
+
    ```bash
    # Place your certificates in the ssl directory
    cp your-certificate.pem ssl/fullchain.pem
@@ -121,31 +61,33 @@ For deployments without Cloudflare Tunnel, you'll need to manage SSL certificate
    ```
 
 2. **Update configuration files**
-   
+
    **nginx.conf**: Replace `localhost` with your domain name
-   
+
    **SVMesh.Server/Program.cs**: Update CORS origins to include your domain
 
 3. **Deploy application**
+
    ```bash
    # Create directories
    mkdir -p ssl logs
-   
+
    # Build images
    docker-compose build --no-cache
-   
+
    # Start services
    docker-compose up -d
-   
+
    # Wait for services
    sleep 10
    ```
 
 4. **Verify deployment**
+
    ```bash
    # Test HTTP endpoint
    curl -f http://localhost/health
-   
+
    # Test HTTPS endpoint (if SSL configured)
    curl -f https://localhost/health
    ```
@@ -153,6 +95,7 @@ For deployments without Cloudflare Tunnel, you'll need to manage SSL certificate
 ## Post-Deployment Tasks
 
 ### Health Monitoring
+
 ```bash
 # View real-time logs
 docker-compose logs -f
@@ -169,15 +112,16 @@ docker-compose down
 
 ### Security Checklist
 
-**For Cloudflare Tunnel deployments:**
-- [ ] SSL/TLS handled automatically by Cloudflare
-- [ ] No firewall ports need opening
-- [ ] Configure Cloudflare security rules
-- [ ] Review Cloudflare Access policies if using Zero Trust
+**For Traefik deployments:**
+
+- [ ] SSL/TLS configured via Let's Encrypt
+- [ ] Firewall allows Traefik server to connect
+- [ ] Review Traefik middleware configuration
 - [ ] Regularly update Docker images
 - [ ] Monitor logs for suspicious activity
 
 **For traditional deployments:**
+
 - [ ] Update domain names in `nginx.conf`
 - [ ] Update CORS origins in `Program.cs`
 - [ ] SSL certificates properly configured
@@ -204,50 +148,53 @@ docker-compose up -d
 **Common Issues:**
 
 1. **SSL Certificate errors (traditional deployment)**
+
    ```bash
    # Check certificate validity
    openssl x509 -in ssl/fullchain.pem -text -noout
-   
+
    # Renew Let's Encrypt certificate
    sudo certbot renew
    ```
 
 2. **Service not responding**
+
    ```bash
    # Check container logs
    docker-compose logs nginx
-   docker-compose logs svmesh-server
-   
+   docker-compose logs svmesh-app
+
    # Restart services
    docker-compose restart
    ```
 
-3. **Cloudflare Tunnel not working**
-   - Verify tunnel token is correct in `.env`
-   - Check Cloudflare dashboard for tunnel status
-   - Ensure DNS is managed by Cloudflare
-   - Check tunnel configuration in Cloudflare dashboard
+3. **Traefik connectivity issues**
+   - Verify nginx is accessible on configured port
+   - Check firewall rules allow Traefik to connect
+   - Review Traefik logs for routing errors
+   - Ensure domain DNS points to Traefik server
 
 ## Environment Variables
 
 Required environment variables in `.env` file:
 
 ```bash
-# For Cloudflare Tunnel deployment
-CLOUDFLARE_TUNNEL_TOKEN=your_tunnel_token_here
+# Domain Configuration
 DOMAIN=your-domain.com
+
+# Nginx Port (for Traefik to connect to)
+NGINX_PORT=8081
+
+# Application settings
+ASPNETCORE_ENVIRONMENT=Production
 
 # Database settings (if using)
 # DATABASE_URL=your_database_url_here
-
-# Application settings
-# ASPNETCORE_ENVIRONMENT=Production
 ```
 
 ## Important Notes
 
-- **Domain Requirements**: For Cloudflare Tunnel, your domain DNS must be managed by Cloudflare
-- **Automatic DNS**: Tunnel creates CNAME records automatically
-- **No Port Forwarding**: Cloudflare Tunnel eliminates need for port forwarding or SSL management
-- **Security**: Both options provide robust security, but Cloudflare Tunnel offers additional DDoS protection
+- **Traefik Setup**: For Traefik reverse proxy deployment, see [Traefik Static IP Setup Guide](traefik-static-ip-setup.md)
+- **DNS Configuration**: Ensure your domain DNS points to your Traefik server (if using) or your application server
+- **Firewall Rules**: Configure appropriate firewall rules based on your deployment method
 - **Monitoring**: Always monitor application logs and performance after deployment

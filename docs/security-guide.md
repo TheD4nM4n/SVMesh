@@ -31,6 +31,7 @@ COPY --from=build /app .
 ```
 
 **Security Benefits:**
+
 - Reduces image size by 60-80%
 - Removes build tools and source code from final image
 - Minimizes potential vulnerabilities
@@ -49,6 +50,7 @@ USER nextjs
 ```
 
 **Security Benefits:**
+
 - Limits potential damage from container escape
 - Prevents privilege escalation attacks
 - Follows principle of least privilege
@@ -65,7 +67,7 @@ services:
     cap_drop:
       - ALL
     cap_add:
-      - NET_BIND_SERVICE  # Only if needed for port binding
+      - NET_BIND_SERVICE # Only if needed for port binding
     read_only: true
     tmpfs:
       - /tmp
@@ -73,6 +75,7 @@ services:
 ```
 
 **Configuration Details:**
+
 - `no-new-privileges`: Prevents privilege escalation
 - `cap_drop: ALL`: Removes all capabilities
 - `read_only: true`: Makes filesystem read-only
@@ -135,10 +138,11 @@ ssl_stapling on;
 ssl_stapling_verify on;
 ```
 
-**For Cloudflare Tunnel:**
-- SSL handled automatically by Cloudflare
-- End-to-end encryption maintained
-- Automatic certificate management
+**For Traefik Reverse Proxy:**
+
+- SSL/TLS handled by Traefik with Let's Encrypt
+- Automatic certificate management and renewal
+- Modern TLS configuration by default
 
 ### CORS Configuration
 
@@ -203,7 +207,7 @@ public async Task<IActionResult> UpdateContent([FromBody] UpdateContentRequest r
 
     // Sanitize content
     var sanitizedContent = _htmlSanitizer.Sanitize(request.Content);
-    
+
     // Process request...
 }
 ```
@@ -226,7 +230,7 @@ app.UseExceptionHandler(errorApp =>
     {
         context.Response.StatusCode = 500;
         context.Response.ContentType = "application/json";
-        
+
         var response = new { error = "Internal server error" };
         await context.Response.WriteAsync(JsonSerializer.Serialize(response));
     });
@@ -238,6 +242,7 @@ app.UseExceptionHandler(errorApp =>
 ### Server Hardening
 
 **System Updates:**
+
 ```bash
 # Keep system updated
 sudo apt update && sudo apt upgrade -y
@@ -248,6 +253,7 @@ sudo dpkg-reconfigure unattended-upgrades
 ```
 
 **Firewall Configuration:**
+
 ```bash
 # Configure UFW (Uncomplicated Firewall)
 sudo ufw default deny incoming
@@ -260,8 +266,9 @@ sudo ufw allow 22/tcp
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
 
-# For Cloudflare Tunnel deployment (no additional ports needed)
-# The tunnel creates outbound connections only
+# For Traefik deployment (allow from Traefik server only)
+# Replace <traefik-server-ip> with your Traefik server's IP
+sudo ufw allow from <traefik-server-ip> to any port 8081
 
 # Enable firewall
 sudo ufw enable
@@ -271,6 +278,7 @@ sudo ufw status verbose
 ```
 
 **SSH Hardening:**
+
 ```bash
 # Edit SSH configuration
 sudo nano /etc/ssh/sshd_config
@@ -289,6 +297,7 @@ sudo systemctl restart sshd
 ### Docker Security
 
 **Docker Daemon Configuration:**
+
 ```json
 # /etc/docker/daemon.json
 {
@@ -304,15 +313,16 @@ sudo systemctl restart sshd
 ```
 
 **Docker Compose Security:**
+
 ```yaml
 # docker-compose.yml security settings
-version: '3.8'
+version: "3.8"
 
 services:
   svmesh-server:
     # ... other settings
     restart: unless-stopped
-    user: "1001:1001"  # Non-root user
+    user: "1001:1001" # Non-root user
     read_only: true
     tmpfs:
       - /tmp:size=100M,noexec,nosuid,nodev
@@ -327,12 +337,13 @@ services:
 networks:
   svmesh-internal:
     driver: bridge
-    internal: true  # No external access
+    internal: true # No external access
 ```
 
 ### Monitoring and Logging
 
 **Log Management:**
+
 ```bash
 # Configure log rotation
 sudo nano /etc/logrotate.d/docker-compose
@@ -350,6 +361,7 @@ sudo nano /etc/logrotate.d/docker-compose
 ```
 
 **Health Monitoring:**
+
 ```bash
 #!/bin/bash
 # health-check.sh
@@ -374,6 +386,7 @@ fi
 ```
 
 **Setup monitoring cron:**
+
 ```bash
 # Add to crontab (crontab -e)
 */5 * * * * /path/to/health-check.sh
@@ -424,21 +437,25 @@ fi
 ### Security Incident Checklist
 
 1. **Immediate Response**
+
    - Isolate affected systems
    - Preserve evidence
    - Stop active threats
 
 2. **Assessment**
+
    - Identify scope of breach
    - Determine what data was accessed
    - Document timeline of events
 
 3. **Containment**
+
    - Patch vulnerabilities
    - Update access controls
    - Implement additional monitoring
 
 4. **Recovery**
+
    - Restore from clean backups if needed
    - Validate system integrity
    - Gradually restore services
@@ -451,6 +468,7 @@ fi
 ### Emergency Procedures
 
 **Immediate Shutdown:**
+
 ```bash
 # Stop all services
 docker-compose down
@@ -460,6 +478,7 @@ docker-compose down --volumes --remove-orphans
 ```
 
 **System Recovery:**
+
 ```bash
 # Restore from backup
 ./restore-backup.sh
@@ -486,11 +505,12 @@ docker-compose down --volumes --remove-orphans
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [Docker Security Best Practices](https://docs.docker.com/engine/security/)
 - [ASP.NET Core Security](https://docs.microsoft.com/en-us/aspnet/core/security/)
-- [Cloudflare Security Features](https://www.cloudflare.com/security/)
+- [Traefik Security Documentation](https://doc.traefik.io/traefik/https/tls/)
 
 ## Contact and Support
 
 For security issues or questions:
+
 - Create a GitHub issue (for non-sensitive matters)
 - Email security contact (for sensitive vulnerabilities)
 - Follow responsible disclosure practices

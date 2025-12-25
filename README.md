@@ -5,6 +5,7 @@ The upcoming website for the Susquehanna Valley Mesh, serving the centeral Penns
 ### Technology Stack
 
 **Frontend:**
+
 - React 19 with TypeScript
 - Material-UI (MUI) for components and styling
 - React Router for navigation
@@ -12,16 +13,18 @@ The upcoming website for the Susquehanna Valley Mesh, serving the centeral Penns
 - React Markdown for content rendering
 
 **Backend:**
+
 - ASP.NET Core 8.0
 - Swagger/OpenAPI for API documentation
 - Built-in health checks
 - CORS and security middleware
 
 **Infrastructure:**
+
 - Docker containers for all services
 - Nginx reverse proxy with security headers
 - Support for SSL/TLS termination
-- Cloudflare Tunnel integration
+- Traefik reverse proxy integration
 - Multi-stage Docker builds for optimization
 
 ## 📋 Prerequisites
@@ -37,12 +40,14 @@ The upcoming website for the Susquehanna Valley Mesh, serving the centeral Penns
 ### Development
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd svmesh
    ```
 
 2. **Start development environment**
+
    ```bash
    # Option 1: Using Docker Compose for development (recommended)
    docker-compose -f docker-compose.dev.yml up
@@ -50,8 +55,8 @@ The upcoming website for the Susquehanna Valley Mesh, serving the centeral Penns
    # Option 2: Run components separately for active development
    # Terminal 1 - Backend
    cd SVMesh.Server && dotnet run
-   
-   # Terminal 2 - Frontend  
+
+   # Terminal 2 - Frontend
    cd svmesh.client && npm run dev
 
    # Option 3: Production-like environment
@@ -68,7 +73,7 @@ The upcoming website for the Susquehanna Valley Mesh, serving the centeral Penns
 For production deployments, see our comprehensive documentation:
 
 - **[📚 Deployment Guide](docs/deployment-guide.md)** - Complete deployment instructions
-- **[🌐 Cloudflare Tunnel Setup](docs/cloudflare-tunnel-setup.md)** - Secure tunnel deployment
+- **[🌐 Traefik Setup Guide](docs/traefik-static-ip-setup.md)** - Reverse proxy deployment
 - **[🔒 Security Guide](docs/security-guide.md)** - Security best practices
 
 ## 📁 Project Structure
@@ -77,7 +82,7 @@ For production deployments, see our comprehensive documentation:
 svmesh/
 ├── docs/                          # Comprehensive documentation
 │   ├── deployment-guide.md        # Production deployment guide
-│   ├── cloudflare-tunnel-setup.md # Tunnel configuration
+│   ├── traefik-static-ip-setup.md # Traefik reverse proxy setup
 │   └── security-guide.md          # Security best practices
 ├── SVMesh.Server/                 # ASP.NET Core backend
 │   ├── Controllers/               # API controllers
@@ -95,7 +100,8 @@ svmesh/
 ├── docker-compose.yml             # Production containers
 ├── Dockerfile                     # Multi-stage build
 ├── nginx.conf                     # Nginx configuration
-├── nginx-cloudflare.conf          # Cloudflare-optimized config
+├── nginx.conf.traefik             # Traefik-optimized config
+├── traefik-config-example.yml     # Example Traefik config
 └── README.md                      # This file
 ```
 
@@ -106,9 +112,11 @@ svmesh/
 Create a `.env` file for production configuration:
 
 ```bash
-# Cloudflare Tunnel (optional)
-CLOUDFLARE_TUNNEL_TOKEN=your_tunnel_token_here
+# Domain Configuration
 DOMAIN=your-domain.com
+
+# Nginx Port (for Traefik to connect to)
+NGINX_PORT=8081
 
 # Application settings
 ASPNETCORE_ENVIRONMENT=Production
@@ -120,6 +128,7 @@ ASPNETCORE_ENVIRONMENT=Production
 ### Application Settings
 
 Key configuration files:
+
 - `SVMesh.Server/appsettings.json` - Backend configuration
 - `svmesh.client/vite.config.ts` - Frontend build configuration
 - `docker-compose.yml` - Container orchestration
@@ -130,6 +139,7 @@ Key configuration files:
 ### Local Development Setup
 
 1. **Install dependencies**
+
    ```bash
    # Backend dependencies
    cd SVMesh.Server
@@ -141,6 +151,7 @@ Key configuration files:
    ```
 
 2. **Run in development mode**
+
    ```bash
    # Terminal 1 - Backend
    cd SVMesh.Server
@@ -152,6 +163,7 @@ Key configuration files:
    ```
 
 3. **Build for production**
+
    ```bash
    # Build all containers
    docker-compose build
@@ -226,17 +238,17 @@ For detailed security information, see the [Security Guide](docs/security-guide.
 
 ## 🚀 Deployment Options
 
-### 1. Cloudflare Tunnel (Recommended)
+### Traefik Reverse Proxy (Recommended)
 
-- ✅ Automatic SSL/TLS
-- ✅ No port forwarding needed
-- ✅ DDoS protection
-- ✅ Zero Trust security
-- ✅ Easy setup
+- ✅ Automatic SSL/TLS with Let's Encrypt
+- ✅ Modern reverse proxy with dynamic configuration
+- ✅ Built-in load balancing
+- ✅ Middleware support for security headers
+- ✅ Works on separate machines (no Docker Swarm needed)
 
-See: [Cloudflare Tunnel Setup Guide](docs/cloudflare-tunnel-setup.md)
+See: [Traefik Static IP Setup Guide](docs/traefik-static-ip-setup.md)
 
-### 2. Traditional HTTPS
+### Traditional HTTPS
 
 - ✅ Full control over SSL certificates
 - ✅ Standard hosting approach
@@ -252,7 +264,7 @@ Comprehensive documentation is available in the `docs/` directory:
 
 - **[📚 docs/README.md](docs/README.md)** - Documentation overview
 - **[🚀 Deployment Guide](docs/deployment-guide.md)** - Production deployment
-- **[🌐 Cloudflare Tunnel Setup](docs/cloudflare-tunnel-setup.md)** - Tunnel configuration
+- **[🌐 Traefik Setup Guide](docs/traefik-static-ip-setup.md)** - Reverse proxy setup
 - **[🔒 Security Guide](docs/security-guide.md)** - Security best practices
 
 ## 🤝 Contributing
@@ -274,6 +286,7 @@ Comprehensive documentation is available in the `docs/` directory:
 ## 📝 Changelog
 
 See individual component changelogs:
+
 - [Server Changelog](SVMesh.Server/CHANGELOG.md)
 - [Client Changelog](svmesh.client/CHANGELOG.md)
 
@@ -292,7 +305,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Built with [ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/)
 - Frontend powered by [React](https://reactjs.org/) and [Material-UI](https://mui.com/)
 - Containerization with [Docker](https://www.docker.com/)
-- Secure deployment with [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/)
+- Reverse proxy with [Traefik](https://traefik.io/)
 
 ---
 

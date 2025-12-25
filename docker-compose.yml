@@ -1,30 +1,12 @@
 services:
-  # Cloudflare Tunnel for secure external access
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: svmesh-tunnel
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-    depends_on:
-      - nginx
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    networks:
-      - default
-
   # Reverse proxy for SSL termination and security
   nginx:
     image: nginx:alpine
     container_name: svmesh-nginx
-    # No external ports - accessed via Cloudflare Tunnel
-    expose:
-      - "80"
+    ports:
+      - "${NGINX_PORT:-8081}:80" # Expose nginx on configurable port
     volumes:
-      - ./nginx.conf.tunnel:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf.traefik:/etc/nginx/nginx.conf:ro
       - /var/log/nginx:/var/log/nginx
     depends_on:
       - svmesh-app
@@ -37,6 +19,8 @@ services:
       - CHOWN
       - SETGID
       - SETUID
+    networks:
+      - internal
 
   # Main SVMesh application
   svmesh-app:
@@ -62,6 +46,8 @@ services:
     tmpfs:
       - /tmp
       - /var/tmp
+    networks:
+      - internal
     healthcheck:
       test:
         [
@@ -82,6 +68,7 @@ volumes:
     driver: local
 
 networks:
-  default:
-    name: svmesh-network
+  # Internal network for app communication
+  internal:
+    name: svmesh-internal
     driver: bridge
