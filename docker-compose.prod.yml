@@ -6,7 +6,7 @@ services:
     ports:
       - "${NGINX_PORT:-8081}:80" # Expose nginx on configurable port
     volumes:
-      - ./nginx.conf.traefik:/etc/nginx/nginx.conf:ro
+      - /opt/svmesh/nginx.conf.traefik:/etc/nginx/nginx.conf:ro
       - /var/log/nginx:/var/log/nginx
     depends_on:
       - svmesh-app
